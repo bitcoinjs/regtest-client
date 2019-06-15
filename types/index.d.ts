@@ -1,5 +1,16 @@
 /// <reference types="node" />
-import { Network } from 'bitcoinjs-lib';
+interface Network {
+    messagePrefix: string;
+    bech32: string;
+    bip32: Bip32;
+    pubKeyHash: number;
+    scriptHash: number;
+    wif: number;
+}
+interface Bip32 {
+    public: number;
+    private: number;
+}
 declare type DhttpResponse = Unspent[] | Request | string | number | void | null;
 interface Unspent {
     value: number;

@@ -1,5 +1,4 @@
 import * as assert from 'assert';
-import { Network } from 'bitcoinjs-lib';
 
 interface ECPairInterface {
   compressed: boolean;
@@ -10,6 +9,20 @@ interface ECPairInterface {
   sign(hash: Buffer): Buffer;
   verify(hash: Buffer, signature: Buffer): boolean;
   getPublicKey?(): Buffer;
+}
+
+interface Network {
+  messagePrefix: string;
+  bech32: string;
+  bip32: Bip32;
+  pubKeyHash: number;
+  scriptHash: number;
+  wif: number;
+}
+
+interface Bip32 {
+  public: number;
+  private: number;
 }
 
 type DhttpResponse = Unspent[] | Request | string | number | void | null;
@@ -80,14 +93,12 @@ export class RegtestUtils {
 
   // use Promises
   async dhttp(options: Request): Promise<DhttpResponse> {
-    return new Promise(
-      (resolve, reject): void => {
-        return dhttpCallback(options, (err: Error, data: DhttpResponse) => {
-          if (err) return reject(err);
-          else return resolve(data);
-        });
-      },
-    );
+    return new Promise((resolve, reject): void => {
+      return dhttpCallback(options, (err: Error, data: DhttpResponse) => {
+        if (err) return reject(err);
+        else return resolve(data);
+      });
+    });
   }
 
   async broadcast(txHex: string): Promise<null> {
