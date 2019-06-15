@@ -4,19 +4,16 @@ const assert = require('assert');
 const dhttpCallback = require('dhttp/200');
 let RANDOM_ADDRESS;
 class RegtestUtils {
-  constructor(
-    bitcoinjs,
-    _APIPASS = process.env.APIPASS || 'satoshi',
-    _APIURL = process.env.APIURL || 'http://127.0.0.1:8080/1',
-  ) {
+  constructor(bitcoinjs, _opts) {
     this.bitcoinjs = bitcoinjs;
-    this._APIPASS = _APIPASS;
-    this._APIURL = _APIURL;
     if (this.bitcoinjs === undefined) {
       throw new Error(
         'You must create an instance by passing bitcoinjs-lib >=4.0.3',
       );
     }
+    this._APIURL =
+      (_opts || {}).APIURL || process.env.APIURL || 'http://127.0.0.1:8080/1';
+    this._APIPASS = (_opts || {}).APIPASS || process.env.APIPASS || 'satoshi';
     this.network = (this.bitcoinjs.networks || {}).regtest;
   }
   get RANDOM_ADDRESS() {

@@ -64,23 +64,29 @@ interface Transaction {
   outs: Output[];
 }
 
+interface RegUtilOpts {
+  APIPASS?: string;
+  APIURL?: string;
+}
+
 const dhttpCallback = require('dhttp/200');
 
 let RANDOM_ADDRESS: string | undefined;
 
 export class RegtestUtils {
   network: Network;
+  private _APIURL: string;
+  private _APIPASS: string;
 
-  constructor(
-    private bitcoinjs: any,
-    private _APIPASS: string = process.env.APIPASS || 'satoshi',
-    private _APIURL: string = process.env.APIURL || 'http://127.0.0.1:8080/1',
-  ) {
+  constructor(private bitcoinjs: any, _opts?: RegUtilOpts) {
     if (this.bitcoinjs === undefined) {
       throw new Error(
         'You must create an instance by passing bitcoinjs-lib >=4.0.3',
       );
     }
+    this._APIURL =
+      (_opts || {}).APIURL || process.env.APIURL || 'http://127.0.0.1:8080/1';
+    this._APIPASS = (_opts || {}).APIPASS || process.env.APIPASS || 'satoshi';
     this.network = (this.bitcoinjs.networks || {}).regtest;
   }
 

@@ -44,12 +44,16 @@ interface Transaction {
     ins: Input[];
     outs: Output[];
 }
+interface RegUtilOpts {
+    APIPASS?: string;
+    APIURL?: string;
+}
 export declare class RegtestUtils {
     private bitcoinjs;
-    private _APIPASS;
-    private _APIURL;
     network: Network;
-    constructor(bitcoinjs: any, _APIPASS?: string, _APIURL?: string);
+    private _APIURL;
+    private _APIPASS;
+    constructor(bitcoinjs: any, _opts?: RegUtilOpts);
     readonly RANDOM_ADDRESS: string;
     dhttp(options: Request): Promise<DhttpResponse>;
     broadcast(txHex: string): Promise<null>;

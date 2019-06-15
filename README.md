@@ -7,7 +7,13 @@ A library for managing regtest server. (Good for integration tests)
 Default URL is `http://127.0.0.1:8080/1`, and the recommended way to set up a server
 is to run a docker container locally.
 
-You can override the URL with `APIURL` environment variable or by running `regtestUtils.changeUrl('xxx')` at runtime.
+You can override the URL with `APIURL` environment variable or by using the
+optional second arg `new RegtestUtils(bitcoin, { APIURL: 'xxx' })` at runtime.
+
+You can also override the API password (set on the server side) with `APIPASS`
+env variable, or `new RegtestUtils(bitcoin, { APIURL: 'xxx', APIPASS: 'yyy' })`
+
+The optional second arg can have either, both, or none of the two overrides.
 
 ## Docker
 
