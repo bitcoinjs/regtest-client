@@ -1,5 +1,6 @@
 /// <reference types="node" />
 import * as bitcoinjs from 'bitcoinjs-lib';
+declare type DhttpResponse = Unspent[] | Request | string | number | void | null;
 interface Unspent {
     value: number;
     txId: string;
@@ -18,6 +19,11 @@ interface Output {
     script: string;
     address?: string;
 }
+interface Request {
+    method?: string;
+    url?: string;
+    body?: string;
+}
 interface Transaction {
     txId: string;
     txHex: string;
@@ -27,6 +33,7 @@ interface Transaction {
     ins: Input[];
     outs: Output[];
 }
+export declare function dhttp(options: Request): Promise<DhttpResponse>;
 export declare function broadcast(txHex: string): Promise<null>;
 export declare function mine(count: number): Promise<string[]>;
 export declare function height(): Promise<number>;

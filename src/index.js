@@ -4,13 +4,15 @@ const assert = require('assert');
 const bitcoinjs = require('bitcoinjs-lib');
 const dhttpCallback = require('dhttp/200');
 // use Promises
-const dhttp = options =>
-  new Promise((resolve, reject) => {
+function dhttp(options) {
+  return new Promise((resolve, reject) => {
     return dhttpCallback(options, (err, data) => {
       if (err) return reject(err);
       else return resolve(data);
     });
   });
+}
+exports.dhttp = dhttp;
 function broadcast(txHex) {
   return dhttp({
     method: 'POST',

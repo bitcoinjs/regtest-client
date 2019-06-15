@@ -54,8 +54,8 @@ interface Transaction {
 
 const dhttpCallback = require('dhttp/200');
 // use Promises
-const dhttp = (options: Request): Promise<DhttpResponse> =>
-  new Promise(
+export function dhttp(options: Request): Promise<DhttpResponse> {
+  return new Promise(
     (resolve, reject): void => {
       return dhttpCallback(options, (err: Error, data: DhttpResponse) => {
         if (err) return reject(err);
@@ -63,6 +63,7 @@ const dhttp = (options: Request): Promise<DhttpResponse> =>
       });
     },
   );
+}
 
 export function broadcast(txHex: string): Promise<null> {
   return dhttp({
