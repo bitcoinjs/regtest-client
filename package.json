@@ -22,7 +22,7 @@
     "prepublishOnly": "npm run test && npm run nobuild:gitdiff:ci",
     "prettier": "prettier 'ts_src/**/*.ts' --ignore-path ./.prettierignore",
     "prettierjs": "prettier 'src/**/*.js' --ignore-path ./.prettierignore",
-    "test": "npm run build && npm run format:ci && npm run formatjs:ci && npm run lint && npm run nobuild:unit",
+    "test": "npm run build && npm run format:ci && npm run lint && npm run nobuild:unit",
     "unit": "npm run build && npm run nobuild:unit"
   },
   "keywords": [
