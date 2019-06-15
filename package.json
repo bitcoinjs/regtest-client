@@ -1,0 +1,45 @@
+{
+  "name": "regtest-client",
+  "version": "0.0.1",
+  "description": "A client for regtest bitcoin usage. Requires regtest-server from bitcoinjs github.",
+  "main": "src/index.js",
+  "types": "types/index.d.ts",
+  "scripts": {
+    "build": "npm run clean && tsc -p ./tsconfig.json && npm run formatjs",
+    "clean": "rimraf src/ types/",
+    "format": "npm run prettier -- --write",
+    "formatjs": "npm run prettierjs -- --write",
+    "formatjs:ci": "npm run prettierjs -- --check",
+    "format:ci": "npm run prettier -- --check",
+    "gitdiff:ci": "npm run build && git diff --exit-code",
+    "lint": "tslint -p tsconfig.json -c tslint.json",
+    "nobuild:gitdiff:ci": "git diff --exit-code",
+    "nobuild:unit": "mocha --timeout 50000",
+    "prepublishOnly": "npm run test && npm run nobuild:gitdiff:ci",
+    "prettier": "prettier 'ts_src/**/*.ts' --ignore-path ./.prettierignore",
+    "prettierjs": "prettier 'src/**/*.js' --ignore-path ./.prettierignore",
+    "test": "npm run build && npm run format:ci && npm run formatjs:ci && npm run lint && npm run nobuild:unit",
+    "unit": "npm run build && npm run nobuild:unit"
+  },
+  "keywords": [
+    "bitcoin",
+    "regtest",
+    "client"
+  ],
+  "author": "Jonathan Underwood",
+  "license": "MIT",
+  "dependencies": {
+    "dhttp": "^3.0.3"
+  },
+  "peerDependencies": {
+    "bitcoinjs-lib": ">=4.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^11.13.0",
+    "bitcoinjs-lib": ">=4.0.0",
+    "mocha": "^6.1.4",
+    "prettier": "^1.16.4",
+    "tslint": "^5.15.0",
+    "typescript": "^3.4.2"
+  }
+}
