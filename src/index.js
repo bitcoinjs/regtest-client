@@ -122,7 +122,7 @@ function getAddress(node, myNetwork) {
     .address;
 }
 function randomAddress() {
-  checkLib('randomAddress');
+  if (!SKIPCHECK) checkLib('randomAddress');
   return getAddress(
     bitcoin.ECPair.makeRandom({
       network: bitcoin.networks.regtest,
@@ -135,7 +135,9 @@ let APIPASS = process.env.APIPASS || 'satoshi';
 let APIURL = process.env.APIURL || 'http://127.0.0.1:8080/1';
 let bitcoin = bitcoinjs;
 let NETWORK = bitcoin.networks.regtest;
+let SKIPCHECK = true;
 exports.RANDOM_ADDRESS = randomAddress();
+SKIPCHECK = false;
 exports.network = NETWORK;
 function checkLib(funcName) {
   if (
