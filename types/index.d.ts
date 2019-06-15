@@ -1,5 +1,5 @@
 /// <reference types="node" />
-import * as bitcoin from 'bitcoinjs-lib';
+import * as bitcoinjs from 'bitcoinjs-lib';
 interface Unspent {
     value: number;
     txId: string;
@@ -27,8 +27,6 @@ interface Transaction {
     ins: Input[];
     outs: Output[];
 }
-export declare function changeUrl(newUrl: string): void;
-export declare function changePass(newPass: string): void;
 export declare function broadcast(txHex: string): Promise<null>;
 export declare function mine(count: number): Promise<string[]>;
 export declare function height(): Promise<number>;
@@ -38,6 +36,9 @@ export declare function faucet(address: string, value: number): Promise<Unspent>
 export declare function faucetComplex(output: Buffer, value: number): Promise<Unspent>;
 export declare function verify(txo: Unspent): Promise<void>;
 export declare function randomAddress(): string;
-export declare const RANDOM_ADDRESS: string;
-export declare const network: bitcoin.networks.Network;
+export declare let RANDOM_ADDRESS: string;
+export declare let network: bitcoinjs.networks.Network;
+export declare function injectBitcoinJsLib(newLib: any): void;
+export declare function changeUrl(newUrl: string): void;
+export declare function changePass(newPass: string): void;
 export {};

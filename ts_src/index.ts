@@ -1,5 +1,5 @@
 import * as assert from 'assert';
-import * as bitcoin from 'bitcoinjs-lib';
+import * as bitcoinjs from 'bitcoinjs-lib';
 import { Network } from 'bitcoinjs-lib';
 
 interface ECPairInterface {
@@ -63,18 +63,6 @@ const dhttp = (options: Request): Promise<DhttpResponse> =>
       });
     },
   );
-
-let APIPASS = process.env.APIPASS || 'satoshi';
-let APIURL = process.env.APIURL || 'http://127.0.0.1:8080/1';
-const NETWORK = bitcoin.networks.regtest;
-
-export function changeUrl(newUrl: string): void {
-  APIURL = newUrl;
-}
-
-export function changePass(newPass: string): void {
-  APIPASS = newPass;
-}
 
 export function broadcast(txHex: string): Promise<null> {
   return dhttp({
@@ -165,6 +153,7 @@ export async function faucetComplex(
   output: Buffer,
   value: number,
 ): Promise<Unspent> {
+  checkLib('faucetComplex');
   const keyPair = bitcoin.ECPair.makeRandom({ network: NETWORK });
   const p2pkh = bitcoin.payments.p2pkh({
     pubkey: keyPair.publicKey,
@@ -203,6 +192,7 @@ function getAddress(node: ECPairInterface, myNetwork: Network): string {
 }
 
 export function randomAddress(): string {
+  checkLib('randomAddress');
   return getAddress(
     bitcoin.ECPair.makeRandom({
       network: bitcoin.networks.regtest,
@@ -211,6 +201,42 @@ export function randomAddress(): string {
   );
 }
 
-export const RANDOM_ADDRESS = randomAddress();
+let APIPASS = process.env.APIPASS || 'satoshi';
+let APIURL = process.env.APIURL || 'http://127.0.0.1:8080/1';
+let bitcoin = bitcoinjs;
+let NETWORK = bitcoin.networks.regtest;
+export let RANDOM_ADDRESS = randomAddress();
+export let network = NETWORK;
 
-export const network = NETWORK;
+function checkLib(funcName: string): void {
+  if (
+    !bitcoin ||
+    !bitcoin.networks ||
+    !bitcoin.networks.regtest ||
+    !bitcoin.ECPair ||
+    !bitcoin.ECPair.makeRandom ||
+    !bitcoin.payments ||
+    !bitcoin.TransactionBuilder
+  ) {
+    throw new Error(
+      'bitcoinjs-lib is not loaded correctly. Make sure >=4.0.0 ' +
+        'is installed as a peerDependency in order to run ' +
+        funcName,
+    );
+  }
+}
+
+export function injectBitcoinJsLib(newLib: any): void {
+  bitcoin = newLib;
+  NETWORK = bitcoin.networks.regtest;
+  network = NETWORK;
+  RANDOM_ADDRESS = randomAddress();
+}
+
+export function changeUrl(newUrl: string): void {
+  APIURL = newUrl;
+}
+
+export function changePass(newPass: string): void {
+  APIPASS = newPass;
+}

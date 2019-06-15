@@ -1,7 +1,7 @@
 'use strict';
 Object.defineProperty(exports, '__esModule', { value: true });
 const assert = require('assert');
-const bitcoin = require('bitcoinjs-lib');
+const bitcoinjs = require('bitcoinjs-lib');
 const dhttpCallback = require('dhttp/200');
 // use Promises
 const dhttp = options =>
@@ -11,17 +11,6 @@ const dhttp = options =>
       else return resolve(data);
     });
   });
-let APIPASS = process.env.APIPASS || 'satoshi';
-let APIURL = process.env.APIURL || 'http://127.0.0.1:8080/1';
-const NETWORK = bitcoin.networks.regtest;
-function changeUrl(newUrl) {
-  APIURL = newUrl;
-}
-exports.changeUrl = changeUrl;
-function changePass(newPass) {
-  APIPASS = newPass;
-}
-exports.changePass = changePass;
 function broadcast(txHex) {
   return dhttp({
     method: 'POST',
@@ -100,6 +89,7 @@ async function faucet(address, value) {
 }
 exports.faucet = faucet;
 async function faucetComplex(output, value) {
+  checkLib('faucetComplex');
   const keyPair = bitcoin.ECPair.makeRandom({ network: NETWORK });
   const p2pkh = bitcoin.payments.p2pkh({
     pubkey: keyPair.publicKey,
@@ -132,6 +122,7 @@ function getAddress(node, myNetwork) {
     .address;
 }
 function randomAddress() {
+  checkLib('randomAddress');
   return getAddress(
     bitcoin.ECPair.makeRandom({
       network: bitcoin.networks.regtest,
@@ -140,5 +131,41 @@ function randomAddress() {
   );
 }
 exports.randomAddress = randomAddress;
+let APIPASS = process.env.APIPASS || 'satoshi';
+let APIURL = process.env.APIURL || 'http://127.0.0.1:8080/1';
+let bitcoin = bitcoinjs;
+let NETWORK = bitcoin.networks.regtest;
 exports.RANDOM_ADDRESS = randomAddress();
 exports.network = NETWORK;
+function checkLib(funcName) {
+  if (
+    !bitcoin ||
+    !bitcoin.networks ||
+    !bitcoin.networks.regtest ||
+    !bitcoin.ECPair ||
+    !bitcoin.ECPair.makeRandom ||
+    !bitcoin.payments ||
+    !bitcoin.TransactionBuilder
+  ) {
+    throw new Error(
+      'bitcoinjs-lib is not loaded correctly. Make sure >=4.0.0 ' +
+        'is installed as a peerDependency in order to run ' +
+        funcName,
+    );
+  }
+}
+function injectBitcoinJsLib(newLib) {
+  bitcoin = newLib;
+  NETWORK = bitcoin.networks.regtest;
+  exports.network = NETWORK;
+  exports.RANDOM_ADDRESS = randomAddress();
+}
+exports.injectBitcoinJsLib = injectBitcoinJsLib;
+function changeUrl(newUrl) {
+  APIURL = newUrl;
+}
+exports.changeUrl = changeUrl;
+function changePass(newPass) {
+  APIPASS = newPass;
+}
+exports.changePass = changePass;
