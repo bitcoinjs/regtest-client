@@ -27,7 +27,11 @@ Pull requests must all contain TS, JS, and types where needed.
 ```js
 // inside an async function to use await
 
-const regtestUtils = require('regtest-client')
+// bitcoinjs-lib must be >=4.0.3
+const bitcoin = require('bitcoinjs-lib')
+const { RegtestUtils } = require('regtest-client')
+const regtestUtils = new RegtestUtils(bitcoin)
+
 const network = regtestUtils.network // regtest network params
 
 const keyPair = bitcoin.ECPair.makeRandom({ network })

@@ -1,5 +1,5 @@
 /// <reference types="node" />
-import * as bitcoinjs from 'bitcoinjs-lib';
+import { Network } from 'bitcoinjs-lib';
 declare type DhttpResponse = Unspent[] | Request | string | number | void | null;
 interface Unspent {
     value: number;
@@ -33,19 +33,22 @@ interface Transaction {
     ins: Input[];
     outs: Output[];
 }
-export declare function dhttp(options: Request): Promise<DhttpResponse>;
-export declare function broadcast(txHex: string): Promise<null>;
-export declare function mine(count: number): Promise<string[]>;
-export declare function height(): Promise<number>;
-export declare function fetch(txId: string): Promise<Transaction>;
-export declare function unspents(address: string): Promise<Unspent[]>;
-export declare function faucet(address: string, value: number): Promise<Unspent>;
-export declare function faucetComplex(output: Buffer, value: number): Promise<Unspent>;
-export declare function verify(txo: Unspent): Promise<void>;
-export declare function randomAddress(): string;
-export declare let RANDOM_ADDRESS: string;
-export declare let network: bitcoinjs.networks.Network;
-export declare function injectBitcoinJsLib(newLib: any): void;
-export declare function changeUrl(newUrl: string): void;
-export declare function changePass(newPass: string): void;
+export declare class RegtestUtils {
+    private bitcoinjs;
+    private _APIPASS;
+    private _APIURL;
+    network: Network;
+    constructor(bitcoinjs: any, _APIPASS?: string, _APIURL?: string);
+    readonly RANDOM_ADDRESS: string;
+    dhttp(options: Request): Promise<DhttpResponse>;
+    broadcast(txHex: string): Promise<null>;
+    mine(count: number): Promise<string[]>;
+    height(): Promise<number>;
+    fetch(txId: string): Promise<Transaction>;
+    unspents(address: string): Promise<Unspent[]>;
+    faucet(address: string, value: number): Promise<Unspent>;
+    faucetComplex(output: Buffer, value: number): Promise<Unspent>;
+    verify(txo: Unspent): Promise<void>;
+    randomAddress(): string;
+}
 export {};
