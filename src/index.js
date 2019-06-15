@@ -152,7 +152,7 @@ function checkLib(funcName) {
     !bitcoin.TransactionBuilder
   ) {
     throw new Error(
-      'bitcoinjs-lib is not loaded correctly. Make sure >=4.0.0 ' +
+      'bitcoinjs-lib is not loaded correctly. Make sure >=4.0.3 ' +
         'is installed as a peerDependency in order to run ' +
         funcName,
     );
