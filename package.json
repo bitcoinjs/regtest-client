@@ -4,6 +4,10 @@
   "description": "A client for regtest bitcoin usage. Requires regtest-server from bitcoinjs github.",
   "main": "src/index.js",
   "types": "types/index.d.ts",
+  "files": [
+    "src",
+    "types"
+  ],
   "scripts": {
     "build": "npm run clean && tsc -p ./tsconfig.json && npm run formatjs",
     "clean": "rimraf src/ types/",
