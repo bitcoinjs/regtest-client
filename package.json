@@ -1,6 +1,6 @@
 {
   "name": "regtest-client",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "A client for regtest bitcoin usage. Requires regtest-server from bitcoinjs github.",
   "main": "src/index.js",
   "types": "types/index.d.ts",
