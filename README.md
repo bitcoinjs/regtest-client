@@ -33,7 +33,8 @@ Pull requests must all contain TS, JS, and types where needed.
 ```js
 // inside an async function to use await
 
-// bitcoinjs-lib must be >=4.0.3
+// bitcoinjs-lib must be the >=5.0.6 to use.
+// For bitcoinjs-lib >=4.0.3, use version v0.0.8 of regtest-client
 const bitcoin = require('bitcoinjs-lib')
 const { RegtestUtils } = require('regtest-client')
 const regtestUtils = new RegtestUtils(bitcoin)
@@ -71,8 +72,16 @@ txb.addInput(unspentComplex.txId, unspentComplex.vout)
 // (You won't have the private key though.)
 txb.addOutput(regtestUtils.RANDOM_ADDRESS, 1e4)
 
-txb.sign(0, keyPair)
-txb.sign(1, keyPair)
+txb.sign({
+  prevOutScriptType: 'p2pkh',
+  vin: 0,
+  keyPair,
+})
+txb.sign({
+  prevOutScriptType: 'p2pkh',
+  vin: 1,
+  keyPair,
+})
 const tx = txb.build()
 
 // build and broadcast to the Bitcoin Local RegTest server

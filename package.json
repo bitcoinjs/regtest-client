@@ -1,6 +1,6 @@
 {
   "name": "regtest-client",
-  "version": "0.0.8",
+  "version": "0.1.0",
   "description": "A client for regtest bitcoin usage. Requires regtest-server from bitcoinjs github.",
   "main": "src/index.js",
   "types": "types/index.d.ts",
@@ -37,7 +37,7 @@
   },
   "devDependencies": {
     "@types/node": "^11.13.0",
-    "bitcoinjs-lib": "5.0.5",
+    "bitcoinjs-lib": "git+https://github.com/bitcoinjs/bitcoinjs-lib.git#8bbe7c7178f8f7d0cdbed13da13a6e62dacb3d06",
     "mocha": "^6.1.4",
     "prettier": "^1.16.4",
     "rimraf": "^2.6.3",

@@ -4,6 +4,7 @@ const bitcoin = require('bitcoinjs-lib')
 const { RegtestUtils } = require('..')
 const regtestUtils = new RegtestUtils(bitcoin)
 const { network } = regtestUtils
+const sleep = ms => new Promise(r => setTimeout(r, ms))
 
 describe('regtest utils', () => {
   it('should get the current height', async () => {
@@ -29,6 +30,8 @@ describe('regtest utils', () => {
 
     const unspentComplex = await regtestUtils.faucetComplex(p2pkh.output, 1e4)
 
+    await sleep(100);
+
     const unspents = await regtestUtils.unspents(p2pkh.address)
 
     const fetchedTx = await regtestUtils.fetch(unspent.txId)
@@ -52,8 +55,16 @@ describe('regtest utils', () => {
     txb.addInput(unspentComplex.txId, unspentComplex.vout)
     txb.addOutput(regtestUtils.RANDOM_ADDRESS, 1e4)
 
-    txb.sign(0, keyPair)
-    txb.sign(1, keyPair)
+    txb.sign({
+      prevOutScriptType: 'p2pkh',
+      vin: 0,
+      keyPair,
+    })
+    txb.sign({
+      prevOutScriptType: 'p2pkh',
+      vin: 1,
+      keyPair,
+    })
     const tx = txb.build()
 
     // build and broadcast to the Bitcoin RegTest network
