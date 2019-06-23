@@ -4,6 +4,7 @@ const bitcoin = require('bitcoinjs-lib')
 const { RegtestUtils } = require('..')
 const regtestUtils = new RegtestUtils(bitcoin)
 const { network } = regtestUtils
+const sleep = ms => new Promise(r => setTimeout(r, ms))
 
 describe('regtest utils', () => {
   it('should get the current height', async () => {
@@ -28,6 +29,8 @@ describe('regtest utils', () => {
     const unspent = await regtestUtils.faucet(p2pkh.address, 2e4)
 
     const unspentComplex = await regtestUtils.faucetComplex(p2pkh.output, 1e4)
+
+    await sleep(100);
 
     const unspents = await regtestUtils.unspents(p2pkh.address)
 
