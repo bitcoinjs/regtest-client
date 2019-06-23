@@ -52,8 +52,16 @@ describe('regtest utils', () => {
     txb.addInput(unspentComplex.txId, unspentComplex.vout)
     txb.addOutput(regtestUtils.RANDOM_ADDRESS, 1e4)
 
-    txb.sign(0, keyPair)
-    txb.sign(1, keyPair)
+    txb.sign({
+      prevOutScriptType: 'p2pkh',
+      vin: 0,
+      keyPair,
+    })
+    txb.sign({
+      prevOutScriptType: 'p2pkh',
+      vin: 1,
+      keyPair,
+    })
     const tx = txb.build()
 
     // build and broadcast to the Bitcoin RegTest network

@@ -203,7 +203,11 @@ export class RegtestUtils {
     const txvb = new this.bitcoinjs.TransactionBuilder(this.network);
     txvb.addInput(unspent.txId, unspent.vout, undefined, p2pkh.output!);
     txvb.addOutput(output, value);
-    txvb.sign(0, keyPair);
+    txvb.sign({
+      prevOutScriptType: 'p2pkh',
+      vin: 0,
+      keyPair,
+    });
     const txv = txvb.build();
 
     await this.broadcast(txv.toHex());
