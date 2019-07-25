@@ -33,10 +33,13 @@
   "author": "Jonathan Underwood",
   "license": "MIT",
   "dependencies": {
-    "dhttp": "^3.0.3"
+    "bs58check": "^2.1.2",
+    "dhttp": "^3.0.3",
+    "randombytes": "^2.1.0"
   },
   "devDependencies": {
     "@types/node": "^11.13.0",
+    "@types/randombytes": "^2.0.0",
     "bitcoinjs-lib": "git+https://github.com/bitcoinjs/bitcoinjs-lib.git#8bbe7c7178f8f7d0cdbed13da13a6e62dacb3d06",
     "mocha": "^6.1.4",
     "prettier": "^1.16.4",

@@ -1,20 +1,27 @@
 'use strict';
 Object.defineProperty(exports, '__esModule', { value: true });
 const assert = require('assert');
+const rng = require('randombytes');
+const bs58check = require('bs58check');
 const dhttpCallback = require('dhttp/200');
 let RANDOM_ADDRESS;
 class RegtestUtils {
-  constructor(bitcoinjs, _opts) {
-    this.bitcoinjs = bitcoinjs;
-    if (this.bitcoinjs === undefined) {
-      throw new Error(
-        'You must create an instance by passing bitcoinjs-lib >=4.0.3',
-      );
-    }
+  constructor(_opts) {
     this._APIURL =
       (_opts || {}).APIURL || process.env.APIURL || 'http://127.0.0.1:8080/1';
     this._APIPASS = (_opts || {}).APIPASS || process.env.APIPASS || 'satoshi';
-    this.network = (this.bitcoinjs.networks || {}).regtest;
+    // regtest network parameters
+    this.network = {
+      messagePrefix: '\x18Bitcoin Signed Message:\n',
+      bech32: 'bcrt',
+      bip32: {
+        public: 0x043587cf,
+        private: 0x04358394,
+      },
+      pubKeyHash: 0x6f,
+      scriptHash: 0xc4,
+      wif: 0xef,
+    };
   }
   get RANDOM_ADDRESS() {
     if (RANDOM_ADDRESS === undefined) {
@@ -63,68 +70,27 @@ class RegtestUtils {
     });
   }
   async faucet(address, value) {
-    let count = 0;
-    let _unspents = [];
-    const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
-    const randInt = (min, max) =>
-      min + Math.floor((max - min + 1) * Math.random());
-    const _faucetRequest = _faucetRequestMaker(
+    const requester = _faucetRequestMaker(
+      'faucet',
+      'address',
       this.dhttp,
       this._APIURL,
       this._APIPASS,
     );
-    while (_unspents.length === 0) {
-      if (count > 0) {
-        if (count >= 5) throw new Error('Missing Inputs');
-        console.log('Missing Inputs, retry #' + count);
-        await sleep(randInt(150, 250));
-      }
-      const txId = await _faucetRequest(address, value).then(
-        v => v, // Pass success value as is
-        async err => {
-          // Bad Request error is fixed by making sure height is >= 432
-          const currentHeight = await this.height();
-          if (err.message === 'Bad Request' && currentHeight < 432) {
-            await this.mine(432 - currentHeight);
-            return _faucetRequest(address, value);
-          } else if (err.message === 'Bad Request' && currentHeight >= 432) {
-            return _faucetRequest(address, value);
-          } else {
-            throw err;
-          }
-        },
-      );
-      await sleep(randInt(50, 150));
-      const results = await this.unspents(address);
-      _unspents = results.filter(x => x.txId === txId);
-      count++;
-    }
-    return _unspents.pop();
+    const faucet = _faucetMaker(this, requester);
+    return faucet(address, value);
   }
   async faucetComplex(output, value) {
-    checkLib(this.bitcoinjs, 'faucetComplex');
-    const keyPair = this.bitcoinjs.ECPair.makeRandom({ network: this.network });
-    const p2pkh = this.bitcoinjs.payments.p2pkh({
-      pubkey: keyPair.publicKey,
-      network: this.network,
-    });
-    const unspent = await this.faucet(p2pkh.address, value * 2);
-    const txvb = new this.bitcoinjs.TransactionBuilder(this.network);
-    txvb.addInput(unspent.txId, unspent.vout, undefined, p2pkh.output);
-    txvb.addOutput(output, value);
-    txvb.sign({
-      prevOutScriptType: 'p2pkh',
-      vin: 0,
-      keyPair,
-    });
-    const txv = txvb.build();
-    await this.broadcast(txv.toHex());
-    return {
-      height: -1,
-      txId: txv.getId(),
-      vout: 0,
-      value,
-    };
+    const outputString = output.toString('hex');
+    const requester = _faucetRequestMaker(
+      'faucetScript',
+      'script',
+      this.dhttp,
+      this._APIURL,
+      this._APIPASS,
+    );
+    const faucet = _faucetMaker(this, requester);
+    return faucet(outputString, value);
   }
   async verify(txo) {
     const tx = await this.fetch(txo.txId);
@@ -133,42 +99,51 @@ class RegtestUtils {
     if (txo.value) assert.strictEqual(txoActual.value, txo.value);
   }
   randomAddress() {
-    checkLib(this.bitcoinjs, 'randomAddress');
-    return getAddress(
-      this.bitcoinjs,
-      this.bitcoinjs.ECPair.makeRandom({
-        network: this.bitcoinjs.networks.regtest,
-      }),
-      this.bitcoinjs.networks.regtest,
-    );
+    // Fake P2PKH address with regtest/testnet version byte
+    return bs58check.encode(Buffer.concat([Buffer.from([0x6f]), rng(20)]));
   }
 }
 exports.RegtestUtils = RegtestUtils;
-function getAddress(bitcoin, node, myNetwork) {
-  return bitcoin.payments.p2pkh({ pubkey: node.publicKey, network: myNetwork })
-    .address;
-}
-function _faucetRequestMaker(dhttp, url, pass) {
+function _faucetRequestMaker(name, paramName, dhttp, url, pass) {
   return async (address, value) =>
     dhttp({
       method: 'POST',
-      url: `${url}/r/faucet?address=${address}&value=${value}&key=${pass}`,
+      url: `${url}/r/${name}?${paramName}=${address}&value=${value}&key=${pass}`,
     });
 }
-function checkLib(bitcoin, funcName) {
-  if (
-    !bitcoin ||
-    !bitcoin.networks ||
-    !bitcoin.networks.regtest ||
-    !bitcoin.ECPair ||
-    !bitcoin.ECPair.makeRandom ||
-    !bitcoin.payments ||
-    !bitcoin.TransactionBuilder
-  ) {
-    throw new Error(
-      'bitcoinjs-lib is not loaded correctly. Make sure >=4.0.3 ' +
-        'is installed as a peerDependency in order to run ' +
-        funcName,
-    );
-  }
+function _faucetMaker(self, _requester) {
+  return async (address, value) => {
+    let count = 0;
+    let _unspents = [];
+    const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
+    const randInt = (min, max) =>
+      min + Math.floor((max - min + 1) * Math.random());
+    while (_unspents.length === 0) {
+      if (count > 0) {
+        if (count >= 5) throw new Error('Missing Inputs');
+        console.log('Missing Inputs, retry #' + count);
+        await sleep(randInt(150, 250));
+      }
+      const txId = await _requester(address, value).then(
+        v => v, // Pass success value as is
+        async err => {
+          // Bad Request error is fixed by making sure height is >= 432
+          const currentHeight = await self.height();
+          if (err.message === 'Bad Request' && currentHeight < 432) {
+            await self.mine(432 - currentHeight);
+            return _requester(address, value);
+          } else if (err.message === 'Bad Request' && currentHeight >= 432) {
+            return _requester(address, value);
+          } else {
+            throw err;
+          }
+        },
+      );
+      await sleep(randInt(50, 150));
+      const results = await self.unspents(address);
+      _unspents = results.filter(x => x.txId === txId);
+      count++;
+    }
+    return _unspents.pop();
+  };
 }

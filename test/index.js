@@ -2,7 +2,7 @@ const { describe, it } = require('mocha')
 const assert = require('assert')
 const bitcoin = require('bitcoinjs-lib')
 const { RegtestUtils } = require('..')
-const regtestUtils = new RegtestUtils(bitcoin)
+const regtestUtils = new RegtestUtils()
 const { network } = regtestUtils
 const sleep = ms => new Promise(r => setTimeout(r, ms))
 
