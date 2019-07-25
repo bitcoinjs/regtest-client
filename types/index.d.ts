@@ -49,11 +49,10 @@ interface RegUtilOpts {
     APIURL?: string;
 }
 export declare class RegtestUtils {
-    private bitcoinjs;
     network: Network;
     private _APIURL;
     private _APIPASS;
-    constructor(bitcoinjs: any, _opts?: RegUtilOpts);
+    constructor(_opts?: RegUtilOpts);
     readonly RANDOM_ADDRESS: string;
     dhttp(options: Request): Promise<DhttpResponse>;
     broadcast(txHex: string): Promise<null>;
