@@ -1,5 +1,6 @@
 'use strict';
 Object.defineProperty(exports, '__esModule', { value: true });
+exports.RegtestUtils = void 0;
 const assert = require('assert');
 const rng = require('randombytes');
 const bs58check = require('bs58check');
@@ -135,7 +136,20 @@ function _faucetMaker(self, _requester) {
     );
     while (_unspents.length === 0) {
       if (count > 0) {
-        if (count >= 5) throw new Error('Missing Inputs');
+        if (count >= 5) {
+          // Sometimes indexd takes more than 60 secs to sync.
+          console.log('WARNING: Indexd is busy. Using getrawtransaction RPC.');
+          const tx = await self.fetch(txId);
+          const outs = tx.outs.filter(x => x.address === address);
+          const out = outs.pop();
+          if (out) {
+            const vout = tx.outs.indexOf(out);
+            const v = out.value;
+            return { txId, vout, value: v };
+          } else {
+            throw new Error('Missing Inputs');
+          }
+        }
         console.log('Missing Inputs, retry #' + count);
         await sleep(randInt(150, 250));
       }
