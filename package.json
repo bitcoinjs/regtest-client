@@ -41,7 +41,7 @@
     "@types/node": "^11.13.0",
     "@types/randombytes": "^2.0.0",
     "bitcoinjs-lib": "^5.2.0",
-    "mocha": "^6.1.4",
+    "mocha": "^10.2.0",
     "prettier": "^1.16.4",
     "rimraf": "^2.6.3",
     "tslint": "^5.15.0",

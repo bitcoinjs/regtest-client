@@ -53,7 +53,7 @@ export declare class RegtestUtils {
     private _APIURL;
     private _APIPASS;
     constructor(_opts?: RegUtilOpts);
-    readonly RANDOM_ADDRESS: string;
+    get RANDOM_ADDRESS(): string;
     dhttp(options: Request): Promise<DhttpResponse>;
     broadcast(txHex: string): Promise<null>;
     mine(count: number): Promise<string[]>;
