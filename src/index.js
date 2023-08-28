@@ -1,5 +1,6 @@
 'use strict';
 Object.defineProperty(exports, '__esModule', { value: true });
+exports.RegtestUtils = void 0;
 const assert = require('assert');
 const rng = require('randombytes');
 const bs58check = require('bs58check');
@@ -118,27 +119,40 @@ function _faucetMaker(self, _requester) {
     const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
     const randInt = (min, max) =>
       min + Math.floor((max - min + 1) * Math.random());
+    const txId = await _requester(address, value).then(
+      v => v, // Pass success value as is
+      async err => {
+        // Bad Request error is fixed by making sure height is >= 432
+        const currentHeight = await self.height();
+        if (err.message === 'Bad Request' && currentHeight < 432) {
+          await self.mine(432 - currentHeight);
+          return _requester(address, value);
+        } else if (err.message === 'Bad Request' && currentHeight >= 432) {
+          return _requester(address, value);
+        } else {
+          throw err;
+        }
+      },
+    );
     while (_unspents.length === 0) {
       if (count > 0) {
-        if (count >= 5) throw new Error('Missing Inputs');
+        if (count >= 5) {
+          // Sometimes indexd takes more than 60 secs to sync.
+          console.log('WARNING: Indexd is busy. Using getrawtransaction RPC.');
+          const tx = await self.fetch(txId);
+          const outs = tx.outs.filter(x => x.address === address);
+          const out = outs.pop();
+          if (out) {
+            const vout = tx.outs.indexOf(out);
+            const v = out.value;
+            return { txId, vout, value: v };
+          } else {
+            throw new Error('Missing Inputs');
+          }
+        }
         console.log('Missing Inputs, retry #' + count);
         await sleep(randInt(150, 250));
       }
-      const txId = await _requester(address, value).then(
-        v => v, // Pass success value as is
-        async err => {
-          // Bad Request error is fixed by making sure height is >= 432
-          const currentHeight = await self.height();
-          if (err.message === 'Bad Request' && currentHeight < 432) {
-            await self.mine(432 - currentHeight);
-            return _requester(address, value);
-          } else if (err.message === 'Bad Request' && currentHeight >= 432) {
-            return _requester(address, value);
-          } else {
-            throw err;
-          }
-        },
-      );
       await sleep(randInt(50, 150));
       const results = await self.unspents(address);
       _unspents = results.filter(x => x.txId === txId);
